@@ -16,7 +16,7 @@ class CartScreen extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(width: 16),
+            SizedBox(width:20.0),
             Text(
               'Bộ sưu tập',
               style: TextStyle(
