@@ -8,6 +8,8 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -16,7 +18,7 @@ class _MyAppState extends State<MyApp> {
   int _selectedIndex = 0; // Chỉ số trang hiện tại
 
   // Danh sách các trang
-  static List<Widget> _widgetOptions = <Widget>[
+  static final List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
     CartScreen(),
     OtherScreen(),
