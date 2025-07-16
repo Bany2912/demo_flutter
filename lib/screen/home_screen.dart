@@ -180,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                   GridView.builder(
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: BouncingScrollPhysics(),
                     shrinkWrap: true,
                     padding: const EdgeInsets.all(16.0),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -291,7 +291,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   },
-
                 ),
               ],
             ),

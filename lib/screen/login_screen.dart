@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mobi/config/default.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -60,7 +61,7 @@ class LoginScreen extends StatelessWidget {
         onPressed: () {},
         child: Text(
           'TIẾP TỤC',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
         ),
       ),
     );
@@ -174,7 +175,7 @@ class LoginScreen extends StatelessWidget {
                 _buildSocialButton(
                   color: Colors.white,
                   icon: Image.asset(
-                    'assets/google_logo.png',
+                    '${urlImg}google_logo.png',
                     height: 24,
                     width: 24,
                   ),

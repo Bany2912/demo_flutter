@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobi/screen/home_screen.dart';
-import 'package:mobi/screen/product_screen.dart';
+import 'package:mobi/screen/shopping_screen.dart';
 import 'package:mobi/screen/other_screen.dart';
 import 'package:mobi/screen/login_screen.dart';
 import 'package:mobi/config/default.dart';
