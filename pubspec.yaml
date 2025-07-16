@@ -93,6 +93,8 @@ flutter:
   assets:
     - assets/images/
     - assets/images/slider/
+    - assets/images/product/
+    - assets/images/BST/
     
 
   # To add custom fonts to your application, add a fonts section here,

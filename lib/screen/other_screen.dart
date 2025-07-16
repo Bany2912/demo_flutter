@@ -13,14 +13,11 @@ class OtherScreen extends StatelessWidget {
           // Logo mờ phía sau
           Center(
             child: Opacity(
-              opacity: 0.07,
-              child: Text(
-                'J',
-                style: TextStyle(
-                  fontSize: 260,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0,
-                ),
+              opacity:1,
+              child: Image.asset(
+                'images/logobackground.png',
+                width: 300,
+                fit: BoxFit.contain,
               ),
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobi/config/default.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -103,7 +104,7 @@ class CartScreen extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
                 child: Image.asset(
-                  'assets/giay${index + 1}.jpg', // Thay đổi đường dẫn cho phù hợp
+                 '${urlProduct}giay${index + 1}.png', 
                   height: 150,
                   width: double.infinity,
                   fit: BoxFit.cover,
