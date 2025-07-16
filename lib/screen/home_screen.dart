@@ -35,9 +35,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: clBackground,
       appBar: AppBar(
-        backgroundColor: clBackground,
-        elevation: 4,
-        shadowColor: Colors.black.withOpacity(0.1),
         title: Text(
           'JARDO',
           style: titleStyle.copyWith(
@@ -227,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     locale: 'vi',
                                     symbol: '₫',
                                   ).format(product.price),
-                                  imageUrl: '${urlProduct}${product.mainImage}',
+                                  imageUrl: '$urlProduct${product.mainImage}',
                                 ),
                               ),
                             );
@@ -264,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             top: Radius.circular(16),
                                           ),
                                           child: Image.asset(
-                                            '${urlProduct}${product.mainImage}',
+                                            '$urlProduct${product.mainImage}',
                                             fit: BoxFit.cover, 
                                             width: double.infinity,
                                             height: double.infinity,

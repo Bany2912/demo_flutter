@@ -148,7 +148,7 @@ class _CartScreenState extends State<CartScreen> {
                           locale: 'vi',
                           symbol: '₫',
                         ).format(product.price),
-                        imageUrl: '${urlProduct}${product.mainImage}',
+                        imageUrl: '$urlProduct${product.mainImage}',
                       ),
                     ),
                   );
@@ -178,7 +178,7 @@ class _CartScreenState extends State<CartScreen> {
                                 top: Radius.circular(16),
                               ),
                               child: Image.asset(
-                                '${urlProduct}${product.mainImage}',
+                                '$urlProduct${product.mainImage}',
                                 fit: BoxFit.cover,
                                 width: double.infinity,
                                 height: double.infinity,

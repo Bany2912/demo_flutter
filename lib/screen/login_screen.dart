@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:mobi/config/default.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   Widget _buildLogo() {
     return Column(
