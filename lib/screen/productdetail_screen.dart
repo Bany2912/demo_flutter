@@ -14,6 +14,7 @@ class ProductDetailPage extends StatefulWidget {
     required this.imageUrl,
   }) : super(key: key);
 
+
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();
 }

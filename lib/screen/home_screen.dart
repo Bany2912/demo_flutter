@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:mobi/config/default.dart';
 import 'productdetail_screen.dart';
+import 'package:mobi/getdata/product_data.dart';
+import 'package:mobi/models/product.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +21,14 @@ class _HomeScreenState extends State<HomeScreen> {
     '${urlSlider}slider2.png',
     '${urlSlider}slider3.png',
   ];
+
+  late Future<List<ShoeProduct>> _productsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _productsFuture = ProductData().getProducts();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Image.asset(
-                  imgLogo,
-                  width: 300,
-                  fit: BoxFit.contain,
-                ),
+                Image.asset(imgLogo, width: 300, fit: BoxFit.contain),
                 Container(
                   width: 300,
                   height: 300,
@@ -75,7 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-
           SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,11 +130,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           );
                         }).toList(),
-                      )
+                      ),
                     ],
                   ),
                 ),
-
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
@@ -137,7 +142,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text('Bộ sưu tập mới nhất', style: subTitleStyle),
                       TextButton(
                         onPressed: () {},
-                        child: Text('Xem tất cả', style: TextStyle(color: Colors.grey)),
+                        child: Text(
+                          'Xem tất cả',
+                          style: TextStyle(color: Colors.grey),
+                        ),
                       ),
                     ],
                   ),
@@ -165,8 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 ),
-
-                 Padding(
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -174,121 +181,147 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text('Khám phá sản phẩm', style: subTitleStyle),
                       TextButton(
                         onPressed: () {},
-                        child: Text('Xem tất cả', style: TextStyle(color: Colors.grey)),
+                        child: Text(
+                          'Xem tất cả',
+                          style: TextStyle(color: Colors.grey),
+                        ),
                       ),
                     ],
                   ),
                 ),
-                  GridView.builder(
-                    physics: BouncingScrollPhysics(),
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.all(16.0),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.75,
-                    ),
-                    itemCount: 6,
-                    itemBuilder: (context, index) {
-                    List<String> names = [
-                      'Nike Pegasus 41\n"Jakob Ingebrigtsen"',
-                      'Luka 4 PF \'Navigator\'',
-                      'NIKE P-6000 PRM',
-                      'Nike Air Max 1',
-                      'Nike Air Max Pulse',
-                      'Nike Zoom Vomero 5',
-                    ];
+                FutureBuilder<List<ShoeProduct>>(
+                  future: _productsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return Center(child: Text('No products found.'));
+                    }
 
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ProductDetailPage(
-                              productName: 'Giày Luka 4 PF \'Navigator\'',
-                              productPrice: '499,000đ',
-                              imageUrl: '${urlProduct}giay1.png', 
+                    final products = snapshot.data!.take(6).toList();
+
+                    return GridView.builder(
+                      physics: BouncingScrollPhysics(),
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.all(16.0),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.85, // Giữ nguyên hoặc điều chỉnh nếu muốn ô cao hơn nữa
+                      ),
+                      itemCount: products.length,
+                      itemBuilder: (context, index) {
+                        final product = products[index];
+
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProductDetailPage(
+                                  productName: product.name,
+                                  productPrice: NumberFormat.currency(
+                                    locale: 'vi',
+                                    symbol: '₫',
+                                  ).format(product.price),
+                                  imageUrl: '${urlProduct}${product.mainImage}',
+                                ),
+                              ),
+                            );
+                          },
+                          child: AnimatedContainer(
+                            duration: Duration(milliseconds: 200),
+                            curve: Curves.easeInOut,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 8,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Stack(
+                                    children: [
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[300],
+                                          borderRadius: BorderRadius.vertical(
+                                            top: Radius.circular(16),
+                                          ),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.vertical(
+                                            top: Radius.circular(16),
+                                          ),
+                                          child: Image.asset(
+                                            '${urlProduct}${product.mainImage}',
+                                            fit: BoxFit.cover, 
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            alignment: Alignment.center,
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 8,
+                                        right: 8,
+                                        child: Icon(Icons.favorite_border),
+                                      ),
+                                      Positioned(
+                                        top: 8,
+                                        left: 8,
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            'Mới',
+                                            style: TextStyle(color: Colors.white, fontSize: 10),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        product.name,
+                                        style: productTitleStyle.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        NumberFormat.currency(
+                                          locale: 'vi',
+                                          symbol: '₫',
+                                        ).format(product.price),
+                                        style: productPriceStyle,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         );
                       },
-                      child: AnimatedContainer(
-                        duration: Duration(milliseconds: 200),
-                        curve: Curves.easeInOut,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 8,
-                              offset: Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 150,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Colors.grey[300],
-                                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                              ),
-                              child: Stack(
-                                children: [
-                                  Center(
-                                    child: Image.asset(
-                                      '${urlProduct}giay${index + 1}.png',
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 8,
-                                    right: 8,
-                                    child: Icon(Icons.favorite_border),
-                                  ),
-                                  Positioned(
-                                    top: 8,
-                                    left: 8,
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        'Mới',
-                                        style: TextStyle(color: Colors.white, fontSize: 10),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    names[index],
-                                    style: productTitleStyle.copyWith(fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '499,000đ',
-                                    style:productPriceStyle ,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     );
                   },
                 ),
