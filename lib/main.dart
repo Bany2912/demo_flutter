@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mobi/screen/home_screen.dart';
-import 'package:mobi/screen/cart_screen.dart';
+import 'package:mobi/screen/shopping_screen.dart';
 import 'package:mobi/screen/other_screen.dart';
+import 'package:mobi/screen/login_screen.dart';
+import 'package:mobi/config/default.dart';
 
 
 void main() {
@@ -35,11 +37,15 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Ứng dụng của bạn',
+      theme: ThemeData(
+        scaffoldBackgroundColor: clBackground,
+      ),
       home: Scaffold(
         body: Center(
           child: _widgetOptions.elementAt(_selectedIndex),
         ),
         bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: clBackground,
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
@@ -55,8 +61,8 @@ class _MyAppState extends State<MyApp> {
             ),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: Colors.grey[800], // Màu khi chọn
-          unselectedItemColor: Colors.grey[500], // Màu khi không chọn
+          selectedItemColor: Colors.grey[800],
+          unselectedItemColor: Colors.grey[500],
           onTap: _onItemTapped,
         ),
       ),
