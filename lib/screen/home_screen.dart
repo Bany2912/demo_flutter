@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[200], 
+    final List<String> mainSliderImages = [
+      'assets/images/slider1.png',
+    ];
 
+    return Scaffold(
+      backgroundColor: Colors.grey[200],
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Row(
@@ -25,40 +29,56 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.search, color: Colors.black),
-            onPressed: () {
-              
-            },
+            onPressed: () {},
           ),
           IconButton(
             icon: Icon(Icons.favorite_border, color: Colors.black),
-            onPressed: () {
-              
-            },
+            onPressed: () {},
           ),
           IconButton(
             icon: Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {
-          
-            },
+            onPressed: () {},
           ),
           IconButton(
             icon: Icon(Icons.shopping_bag_outlined, color: Colors.black),
-            onPressed: () {
-              
-            },
+            onPressed: () {},
           ),
         ],
-        centerTitle: false, 
-        elevation: 0, 
+        centerTitle: false,
+        elevation: 0,
       ),
-
-      body: SingleChildScrollView( 
+      body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, 
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            
+
+            // ----------- Slider đầu trang (carousel) -----------
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: CarouselSlider(
+                items: mainSliderImages.map((imagePath) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      imagePath,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    ),
+                  );
+                }).toList(),
+                options: CarouselOptions(
+                  height: 280,
+                  enlargeCenterPage: true,
+                  autoPlay: true,
+                  autoPlayInterval: Duration(seconds: 4),
+                  viewportFraction: 0.9,
+                ),
+              ),
+            ),
+
+            // ----------- Bộ sưu tập mới nhất (ListView ngang có vuốt) -----------
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -67,9 +87,7 @@ class HomeScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   TextButton(
-                    onPressed: () {
-                      
-                    },
+                    onPressed: () {},
                     child: Text('Xem tất cả', style: TextStyle(color: Colors.grey)),
                   ),
                 ],
@@ -79,17 +97,18 @@ class HomeScreen extends StatelessWidget {
               height: 200,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: 5, 
+                physics: BouncingScrollPhysics(), // ✅ Cho phép vuốt
+                itemCount: 5,
+                padding: EdgeInsets.symmetric(horizontal: 16),
                 itemBuilder: (context, index) {
-                  
-                 Image.asset('assets/images/giay1.jpg');
                   return Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.only(right: 12.0),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                       child: Image.asset(
-                            'assets/images/giay1.jpg',
-                        width: 150, 
+                        'assets/images/giay1.jpg', // ✅ Giữ đường dẫn cũ
+                        width: 140,
+                        height: 200,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -98,7 +117,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-          
+            // ----------- Khám phá thêm (giữ nguyên) -----------
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
@@ -107,19 +126,17 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             GridView.builder(
-              physics: NeverScrollableScrollPhysics(), 
-              shrinkWrap: true, 
+              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
               padding: const EdgeInsets.all(16.0),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
-                childAspectRatio: 0.75, 
+                childAspectRatio: 0.75,
               ),
-              itemCount: 6, 
+              itemCount: 6,
               itemBuilder: (context, index) {
-                
-                Image.asset('assets/images/giay1.jpg'); // Thay đổi đường dẫn hình ảnh nếu cần
                 return Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
