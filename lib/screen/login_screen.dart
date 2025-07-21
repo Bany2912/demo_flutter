@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'register_screen.dart';  // import trang đăng ký
 
+<<<<<<< HEAD
 const String urlImg          = 'images/';  // dùng cho Google logo
 const Color kPrimaryBlack    = Colors.black;
 const Color kAccentRed       = Colors.red;
@@ -13,6 +14,10 @@ class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
+=======
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
+>>>>>>> f8e6752157cab7a697e4de6df0b79daad879b980
 
 class _LoginScreenState extends State<LoginScreen> {
   final _phoneCtrl = TextEditingController();

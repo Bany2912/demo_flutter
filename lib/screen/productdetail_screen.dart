@@ -8,11 +8,12 @@ class ProductDetailPage extends StatefulWidget {
   final String imageUrl;
 
   const ProductDetailPage({
-    Key? key,
+    super.key,
     required this.productName,
     required this.productPrice,
     required this.imageUrl,
-  }) : super(key: key);
+  });
+
 
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();

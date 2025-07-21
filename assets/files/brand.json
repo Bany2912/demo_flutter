@@ -1,0 +1,18 @@
+{
+    "data":[
+{
+  "id": "sku-nike",
+  "name": "Nike",
+  "logoUrl": "nike_logo.png",
+  "description": "Official Nike products and apparel."
+},
+{
+  "id": "sku-adidas",
+  "name": "adidas",
+  "logoUrl": "adidas_logo.png",
+  "description": "Official Nike products and apparel."
+}
+
+    ]
+
+}

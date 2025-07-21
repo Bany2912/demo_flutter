@@ -1,9 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:mobi/config/default.dart';
 import 'package:mobi/screen/productdetail_screen.dart';
+import 'package:mobi/getdata/product_data.dart';
+import 'package:mobi/getdata/category_data.dart';
+import 'package:mobi/models/product.dart';
+import 'package:mobi/models/category.dart';
+import 'package:intl/intl.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
+
+  @override
+  _CartScreenState createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  late Future<List<ShoeProduct>> _products;
+  late Future<List<Category>> _categories;
+  // Biến trạng thái để theo dõi danh mục được chọn
+  // _selectedCategoryId = 0 đại diện cho "Tất cả"
+  int _selectedCategoryId = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _products = ProductData().getProducts();
+    _categories = CategoryData().getCategories();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,223 +56,227 @@ class CartScreen extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildFilterButton('Tất cả', true),
+              child: FutureBuilder<List<Category>>(
+                future: _categories,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Text('No categories found.');
+                  }
+
+                  final categories = snapshot.data!;
+
+                  // Tạo danh sách các widget nút lọc
+                  List<Widget> filterButtons = [
+                    // Nút "Tất cả"
+                    _buildFilterButton(null), // Truyền null để đại diện cho "Tất cả"
                     SizedBox(width: 8),
-                    _buildFilterButton('Jordan', false),
-                    SizedBox(width: 8),
-                    _buildFilterButton('Giày chạy bộ', false),
-                    SizedBox(width: 8),
-                    _buildFilterButton('Giày bóng rổ', false),
-                    // Thêm các bộ lọc khác nếu cần
-                  ],
-                ),
+                  ];
+
+                  // Thêm các nút từ dữ liệu categories đã lấy được
+                  for (var category in categories) {
+                    filterButtons.add(_buildFilterButton(category));
+                    filterButtons.add(SizedBox(width: 8));
+                  }
+
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: filterButtons,
+                    ),
+                  );
+                },
               ),
             ),
           ),
         ),
-        elevation: 0, // Loại bỏ bóng đổ
+        elevation: 0,
       ),
-      body: GridView.builder(
-        physics: BouncingScrollPhysics(),
-        shrinkWrap: true,
-        padding: const EdgeInsets.all(16.0),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 0.75,
-        ),
-        itemCount: 6,
-        itemBuilder: (context, index) {
-          List<String> names = [
-            'Nike Pegasus 41\n"Jakob Ingebrigtsen"',
-            'Luka 4 PF \'Navigator\'',
-            'NIKE P-6000 PRM',
-            'Nike Air Max 1',
-            'Nike Air Max Pulse',
-            'Nike Zoom Vomero 5',
-          ];
+      body: FutureBuilder<List<ShoeProduct>>(
+        future: _products,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No products found.'));
+          }
 
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProductDetailPage(
-                    productName: 'Giày Luka 4 PF \'Navigator\'',
-                    productPrice: '499,000đ',
-                    imageUrl: '${urlProduct}giay1.png',
+          final allProducts = snapshot.data!;
+          List<ShoeProduct> displayedProducts;
+
+          // Logic lọc sản phẩm
+          if (_selectedCategoryId == 0) {
+            // Nếu "Tất cả" được chọn, hiển thị tất cả sản phẩm
+            displayedProducts = allProducts;
+          } else {
+            // Lọc sản phẩm theo categoryId
+            displayedProducts = allProducts
+                .where((product) => product.categoryId == _selectedCategoryId)
+                .toList();
+          }
+
+          if (displayedProducts.isEmpty) {
+            return Center(child: Text('Không có sản phẩm nào trong danh mục này.'));
+          }
+
+          return GridView.builder(
+            physics: BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(16.0),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.85,
+            ),
+            itemCount: displayedProducts.length,
+            itemBuilder: (context, index) {
+              final product = displayedProducts[index]; // Sử dụng danh sách đã lọc
+
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductDetailPage(
+                        productName: product.name,
+                        productPrice: NumberFormat.currency(
+                          locale: 'vi',
+                          symbol: '₫',
+                        ).format(product.price),
+                        imageUrl: '$urlProduct${product.mainImage}',
+                      ),
+                    ),
+                  );
+                },
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(16),
+                              ),
+                              child: Image.asset(
+                                '$urlProduct${product.mainImage}',
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                                alignment: Alignment.center,
+                              ),
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: Icon(Icons.favorite_border),
+                            ),
+                            Positioned(
+                              top: 8,
+                              left: 8,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'Mới',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              product.name,
+                              style: productTitleStyle.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              NumberFormat.currency(
+                                locale: 'vi',
+                                symbol: '₫',
+                              ).format(product.price),
+                              style: productPriceStyle,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
             },
-            child: AnimatedContainer(
-              duration: Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 150,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(16),
-                      ),
-                    ),
-                    child: Stack(
-                      children: [
-                        Center(
-                          child: Image.asset(
-                            '${urlProduct}giay${index + 1}.png',
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                          ),
-                        ),
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Icon(Icons.favorite_border),
-                        ),
-                        Positioned(
-                          top: 8,
-                          left: 8,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 4,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              'Mới',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          names[index],
-                          style: productTitleStyle.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text('499,000đ', style: productPriceStyle),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
           );
         },
       ),
     );
   }
 
-  Widget _buildFilterButton(String text, bool isSelected) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: isSelected ? Colors.grey[200] : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: isSelected ? null : Border.all(color: Colors.grey),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: isSelected ? Colors.black : Colors.grey[600],
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
+  // Cập nhật hàm _buildFilterButton để nhận một đối tượng Category
+  // (null nếu là nút "Tất cả")
+  Widget _buildFilterButton(Category? category) {
+    // Nếu category là null, đây là nút "Tất cả"
+    String buttonText = category?.name ?? 'Tất cả';
+    int buttonCategoryId = category?.id ?? 0; // 0 cho "Tất cả"
 
-  Widget _buildProductCard(BuildContext context, int index) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            alignment: Alignment.topRight,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-                child: Image.asset(
-                  '${urlProduct}giay${index + 1}.png',
-                  height: 150,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(Icons.favorite_border, color: Colors.red),
-              ),
-              Positioned(
-                top: 8,
-                left: 8,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    'Mới',
-                    style: TextStyle(color: Colors.white, fontSize: 10),
-                  ),
-                ),
-              ),
-            ],
+    // Kiểm tra xem nút này có đang được chọn hay không
+    bool isSelected = _selectedCategoryId == buttonCategoryId;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedCategoryId = buttonCategoryId;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.grey[200] : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: isSelected ? null : Border.all(color: Colors.grey),
+        ),
+        child: Text(
+          buttonText,
+          style: TextStyle(
+            color: isSelected ? Colors.black : Colors.grey[600],
+            fontWeight: FontWeight.bold,
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Nike Product Name', // Thay đổi tên sản phẩm
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text('499,000đ'), // Thay đổi giá
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
