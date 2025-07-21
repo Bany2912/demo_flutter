@@ -18,11 +18,7 @@ packages:
     source: hosted
     version: "2.1.2"
   carousel_slider:
-<<<<<<< HEAD
-    dependency: "direct main"
-=======
     dependency: "direct dev"
->>>>>>> 595996579131d8428daea9d2016b60c444eaa427
     description:
       name: carousel_slider
       sha256: bcc61735345c9ab5cb81073896579e735f81e35fd588907a393143ea986be8ff
@@ -54,7 +50,7 @@ packages:
     source: hosted
     version: "1.19.1"
   cupertino_icons:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: cupertino_icons
       sha256: ba631d1c7f7bef6b729a622b7b752645a2d076dba9976925b8f25725a30e1ee6
