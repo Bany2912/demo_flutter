@@ -5,6 +5,7 @@ import 'package:mobi/config/default.dart'; // Đảm bảo file này tồn tại
 import 'package:mobi/models/product.dart'; // Đảm bảo import ShoeProduct model
 import 'package:mobi/getdata/product_data.dart'; // Đảm bảo import ProductData để truy cập getProducts
 import 'package:mobi/screen/productdetail_screen.dart'; // Màn hình chi tiết sản phẩm
+import 'package:mobi/screen/cart_screen.dart'; // Import CartScreen
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -41,17 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   late final List<List<String>> _pairs;
-  // Các tên sản phẩm này chỉ là placeholder nếu không dùng dữ liệu từ JSON
-  // Tuy nhiên, chúng ta sẽ ưu tiên dùng dữ liệu từ ShoeProduct
-  // final List<String> names = [
-  //   'Luka 4 PF \'Navigator\'',
-  //   'NIKE P-6000 PRM',
-  //   'Nike C1TY \'Sand\'',
-  //   'Nike Zoom Vomero 5',
-  //   'Nike Air Max Dn',
-  //   'Nike SB Dunk Low',
-  // ];
-  // late List<bool> _isLiked; // Không cần nữa nếu sử dụng dữ liệu từ JSON với logic riêng
 
   @override
   void initState() {
@@ -65,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
             : [collectionImages[i]],
       );
     }
-    // _isLiked = List<bool>.filled(names.length, false); // Không cần nữa
   }
 
   @override
@@ -79,11 +68,39 @@ class _HomeScreenState extends State<HomeScreen> {
           'JARDON', // Đã sửa từ 'JARDO' thành 'JARDON' theo ảnh bạn cung cấp
           style: titleStyle.copyWith(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.black),
         ),
-        actions: const [
-          Icon(Icons.search, color: Colors.black),
-          Icon(Icons.favorite_border, color: Colors.black),
-          Icon(Icons.notifications_none, color: Colors.black),
-          Icon(Icons.shopping_bag_outlined, color: Colors.black),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.black),
+            onPressed: () {
+              // Xử lý tìm kiếm
+            },
+          ),
+          const SizedBox(width: 8), // Khoảng cách
+          IconButton(
+            icon: const Icon(Icons.favorite_border, color: Colors.black),
+            onPressed: () {
+              // Xử lý yêu thích
+            },
+          ),
+          const SizedBox(width: 8), // Khoảng cách
+          IconButton(
+            icon: const Icon(Icons.notifications_none, color: Colors.black),
+            onPressed: () {
+              // Xử lý thông báo
+            },
+          ),
+          const SizedBox(width: 8), // Khoảng cách
+          IconButton(
+            icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
+            onPressed: () {
+              // Điều hướng tới CartScreen
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CartScreen()),
+              );
+            },
+          ),
+          const SizedBox(width: 8), // Khoảng cách cuối cùng cho padding bên phải
         ],
       ),
       body: SingleChildScrollView(
@@ -316,9 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         top: 8,
                                         right: 8,
                                         child: IconButton(
-                                          icon: Icon(
-                                            // Bạn có thể thêm trường isLiked vào ShoeProduct model nếu muốn
-                                            // Hoặc quản lý trạng thái like riêng biệt
+                                          icon: const Icon(
                                             Icons.favorite_border, // Mặc định là outline
                                             color: Colors.black,
                                           ),
