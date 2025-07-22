@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mobi/config/default.dart';
+import 'package:mobi/config/default.dart'; // Đảm bảo bạn có file này và biến urlProduct được định nghĩa
 import 'package:mobi/screen/productdetail_screen.dart';
 import 'package:mobi/getdata/product_data.dart';
-import 'package:mobi/getdata/category_data.dart';
+import 'package:mobi/getdata/category_data.dart'; // Đảm bảo bạn có file CategoryData
 import 'package:mobi/models/product.dart';
-import 'package:mobi/models/category.dart';
+import 'package:mobi/models/category.dart'; // Đảm bảo bạn có file Category model
 import 'package:intl/intl.dart';
 
 class CartScreen extends StatefulWidget {
@@ -24,16 +24,24 @@ class _CartScreenState extends State<CartScreen> {
   @override
   void initState() {
     super.initState();
-    _products = ProductData().getProducts();
-    _categories = CategoryData().getCategories();
+    // SỬA LỖI TẠI ĐÂY: Gọi phương thức static trực tiếp từ lớp
+    _products = ProductData.getProducts();
+    _categories = CategoryData().getCategories(); // Giả định getCategories không static hoặc bạn sẽ cần sửa tương tự
   }
 
   @override
   Widget build(BuildContext context) {
+    // Khai báo formatter tiền tệ tại đây nếu nó chỉ dùng trong build method
+    final NumberFormat _currencyFormatter = NumberFormat.currency(
+      locale: 'vi',
+      symbol: '₫',
+      decimalDigits: 0,
+    );
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Row(
+        title: const Row( // Thêm const nếu có thể
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
@@ -51,7 +59,7 @@ class _CartScreenState extends State<CartScreen> {
           ],
         ),
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(40.0),
+          preferredSize: const Size.fromHeight(40.0), // Thêm const
           child: Align(
             alignment: Alignment.centerLeft,
             child: Padding(
@@ -60,11 +68,11 @@ class _CartScreenState extends State<CartScreen> {
                 future: _categories,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
+                    return const CircularProgressIndicator(); // Thêm const
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text('No categories found.');
+                    return const Text('No categories found.'); // Thêm const
                   }
 
                   final categories = snapshot.data!;
@@ -73,13 +81,13 @@ class _CartScreenState extends State<CartScreen> {
                   List<Widget> filterButtons = [
                     // Nút "Tất cả"
                     _buildFilterButton(null), // Truyền null để đại diện cho "Tất cả"
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8), // Thêm const
                   ];
 
                   // Thêm các nút từ dữ liệu categories đã lấy được
                   for (var category in categories) {
                     filterButtons.add(_buildFilterButton(category));
-                    filterButtons.add(SizedBox(width: 8));
+                    filterButtons.add(const SizedBox(width: 8)); // Thêm const
                   }
 
                   return SingleChildScrollView(
@@ -99,11 +107,11 @@ class _CartScreenState extends State<CartScreen> {
         future: _products,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator()); // Thêm const
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No products found.'));
+            return const Center(child: Text('No products found.')); // Thêm const
           }
 
           final allProducts = snapshot.data!;
@@ -121,13 +129,13 @@ class _CartScreenState extends State<CartScreen> {
           }
 
           if (displayedProducts.isEmpty) {
-            return Center(child: Text('Không có sản phẩm nào trong danh mục này.'));
+            return const Center(child: Text('Không có sản phẩm nào trong danh mục này.')); // Thêm const
           }
 
           return GridView.builder(
-            physics: BouncingScrollPhysics(),
+            physics: const BouncingScrollPhysics(), // Thêm const
             padding: const EdgeInsets.all(16.0),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount( // Thêm const
               crossAxisCount: 2,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
@@ -140,18 +148,18 @@ class _CartScreenState extends State<CartScreen> {
               return GestureDetector(
                 onTap: () {
                   Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => ProductDetailScreen(product: product)),
-    );
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ProductDetailScreen(product: product)),
+                  );
                 },
                 child: AnimatedContainer(
-                  duration: Duration(milliseconds: 200),
+                  duration: const Duration(milliseconds: 200), // Thêm const
                   curve: Curves.easeInOut,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
+                    boxShadow: const [ // Thêm const
                       BoxShadow(
                         color: Colors.black12,
                         blurRadius: 8,
@@ -166,23 +174,33 @@ class _CartScreenState extends State<CartScreen> {
                         child: Stack(
                           children: [
                             ClipRRect(
-                              borderRadius: BorderRadius.vertical(
+                              borderRadius: const BorderRadius.vertical( // Thêm const
                                 top: Radius.circular(16),
                               ),
                               child: Image.asset(
+                                // urlProduct cần được định nghĩa trong default.dart và có thể truy cập được
                                 '$urlProduct${product.mainImage}',
                                 fit: BoxFit.cover,
                                 width: double.infinity,
                                 height: double.infinity,
                                 alignment: Alignment.center,
+                                errorBuilder: (context, error, stackTrace) {
+                                  // Xử lý lỗi tải ảnh
+                                  return Container(
+                                    color: Colors.grey[200],
+                                    child: const Center(
+                                      child: Icon(Icons.image_not_supported, color: Colors.grey, size: 40),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
-                            Positioned(
+                            const Positioned( // Thêm const
                               top: 8,
                               right: 8,
                               child: Icon(Icons.favorite_border),
                             ),
-                            Positioned(
+                           Positioned( // Thêm const
                               top: 8,
                               left: 8,
                               child: Container(
@@ -213,17 +231,14 @@ class _CartScreenState extends State<CartScreen> {
                           children: [
                             Text(
                               product.name,
-                              style: productTitleStyle.copyWith(
+                              style: productTitleStyle.copyWith( // Đảm bảo productTitleStyle được định nghĩa trong config/default.dart
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              NumberFormat.currency(
-                                locale: 'vi',
-                                symbol: '₫',
-                              ).format(product.price),
-                              style: productPriceStyle,
+                              _currencyFormatter.format(product.price),
+                              style: productPriceStyle, // Đảm bảo productPriceStyle được định nghĩa trong config/default.dart
                             ),
                           ],
                         ),
@@ -256,7 +271,7 @@ class _CartScreenState extends State<CartScreen> {
         });
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Thêm const
         decoration: BoxDecoration(
           color: isSelected ? Colors.grey[200] : Colors.white,
           borderRadius: BorderRadius.circular(20),
