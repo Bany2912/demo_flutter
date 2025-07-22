@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:mobi/config/default.dart';
@@ -95,14 +94,15 @@ class _HomeScreenState extends State<HomeScreen> {
                               path,
                               fit: BoxFit.cover,
                               width: double.infinity,
+                              height: 380,
                             ),
                           );
                         }).toList(),
                         options: CarouselOptions(
-                          height: 280,
+                          height: 380,
                           enlargeCenterPage: true,
                           autoPlay: true,
-                          autoPlayInterval: Duration(seconds: 4),
+                          autoPlayInterval: Duration(seconds: 2),
                           viewportFraction: 0.9,
                           onPageChanged: (index, reason) {
                             setState(() {
@@ -112,7 +112,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Row(
+                      Padding(padding:  const EdgeInsets.only(left: 16.0, bottom: 10.0),
+                      child:Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: sliderImages.asMap().entries.map((entry) {
                           return Container(
@@ -128,9 +129,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         }).toList(),
                       ),
+                      )
                     ],
                   ),
                 ),
+                SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
@@ -152,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     physics: BouncingScrollPhysics(),
-                    itemCount: 5,
+                    itemCount: 4,
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     itemBuilder: (context, index) {
                       return Padding(
@@ -170,6 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 ),
+                const SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
@@ -216,18 +220,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         return GestureDetector(
                           onTap: () {
                             Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ProductDetailPage(
-                                  productName: product.name,
-                                  productPrice: NumberFormat.currency(
-                                    locale: 'vi',
-                                    symbol: '₫',
-                                  ).format(product.price),
-                                  imageUrl: '$urlProduct${product.mainImage}',
-                                ),
-                              ),
-                            );
+    context,
+    MaterialPageRoute(
+      builder: (context) => ProductDetailScreen(product: product)),
+    );
                           },
                           child: AnimatedContainer(
                             duration: Duration(milliseconds: 200),

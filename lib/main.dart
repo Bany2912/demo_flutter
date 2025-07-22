@@ -39,16 +39,16 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
         scaffoldBackgroundColor: clBackground,
 
-        // 🎨 Cấu hình AppBarTheme toàn cục để làm AppBar mờ/trong suốt
+        
         appBarTheme: AppBarTheme(
-          backgroundColor: Colors.white.withOpacity(0.5), // Màu trắng với độ mờ 50%
-          elevation: 0, // Loại bỏ bóng đổ
-          shadowColor: Colors.transparent, // Đảm bảo bóng đổ hoàn toàn trong suốt
-          surfaceTintColor: Colors.transparent, // Quan trọng cho Material 3 để loại bỏ màu phủ bề mặt
-          iconTheme: const IconThemeData(color: Colors.black), // Màu mặc định cho các icon trên AppBar
-          actionsIconTheme: const IconThemeData(color: Colors.black), // Màu mặc định cho các icon hành động trên AppBar
-          // Cấu hình kiểu chữ cho tiêu đề AppBar
-          titleTextStyle: titleStyle.copyWith( // Sử dụng titleStyle từ default.dart
+          backgroundColor: Colors.white.withOpacity(0.5), 
+          elevation: 0, 
+          shadowColor: Colors.transparent, 
+          surfaceTintColor: Colors.transparent, 
+          iconTheme: const IconThemeData(color: Colors.black), 
+          actionsIconTheme: const IconThemeData(color: Colors.black), 
+         
+          titleTextStyle: titleStyle.copyWith(
             fontSize: 26,
             fontWeight: FontWeight.w900,
             letterSpacing: -1.0,

@@ -6,7 +6,7 @@ class ShoeProduct {
   final String brandId; 
   final int categoryId; 
   final double price; // <-- Phải là double
-  final String? description;
+  final String description;
   final String mainImage; // <-- KHÔNG CÓ DẤU '?' ở đây, và nó là 'required'
   final List<ShoeVariant> variants;
 
@@ -17,7 +17,7 @@ class ShoeProduct {
     required this.categoryId,
     required this.price,
     required this.variants,
-    this.description,
+    required this.description,
     required this.mainImage, // <-- Thêm 'required' vào constructor
   });
 

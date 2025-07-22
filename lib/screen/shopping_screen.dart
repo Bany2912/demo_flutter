@@ -140,18 +140,10 @@ class _CartScreenState extends State<CartScreen> {
               return GestureDetector(
                 onTap: () {
                   Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ProductDetailPage(
-                        productName: product.name,
-                        productPrice: NumberFormat.currency(
-                          locale: 'vi',
-                          symbol: '₫',
-                        ).format(product.price),
-                        imageUrl: '$urlProduct${product.mainImage}',
-                      ),
-                    ),
-                  );
+    context,
+    MaterialPageRoute(
+      builder: (context) => ProductDetailScreen(product: product)),
+    );
                 },
                 child: AnimatedContainer(
                   duration: Duration(milliseconds: 200),

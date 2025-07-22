@@ -9,6 +9,11 @@
       "id": 2,
       "name": "Chạy bộ",
       "iconUrl": null
+    },
+    {
+       "id":3,
+       "name": "Bóng đá",
+       "iconUrl": null
     }
   ]
 }
