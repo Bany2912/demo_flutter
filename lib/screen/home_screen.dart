@@ -1,32 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:mobi/config/default.dart';
-import 'productdetail_screen.dart';
-import 'package:mobi/getdata/product_data.dart';
-import 'package:mobi/models/product.dart';
-import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
+  const HomeScreen({Key? key}) : super(key: key);
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
+  int _currentIndex = 0;        // main banner
+  int _collectionIndex = 0;     // bộ sưu tập mới
+
   final List<String> sliderImages = [
     '${urlSlider}slider1.png',
     '${urlSlider}slider2.png',
     '${urlSlider}slider3.png',
   ];
 
-  late Future<List<ShoeProduct>> _productsFuture;
+  // 4 ảnh ví dụ cho “Bộ sưu tập mới nhất”
+  final List<String> collectionImages = [
+    '${urlBST}bst1.png',
+    '${urlBST}bst2.png',
+    '${urlBST}bst3.png',
+    '${urlBST}bst4.png',
+  ];
+
+  late final List<List<String>> _pairs;
+  final List<String> names = [
+    'Luka 4 PF \'Navigator\'',
+    'NIKE P-6000 PRM',
+    'Nike C1TY \'Sand\'',
+    'Nike Zoom Vomero 5',
+    'Nike Air Max Dn',
+    'Nike SB Dunk Low',
+  ];
+  late List<bool> _isLiked;
 
   @override
   void initState() {
     super.initState();
-    _productsFuture = ProductData().getProducts();
+    // chia thành cặp 2 ảnh cho carousel bộ sưu tập
+    _pairs = [];
+    for (var i = 0; i < collectionImages.length; i += 2) {
+      _pairs.add(
+        (i + 1 < collectionImages.length)
+            ? [collectionImages[i], collectionImages[i + 1]]
+            : [collectionImages[i]],
+      );
+    }
+    _isLiked = List<bool>.filled(names.length, false);
   }
 
   @override
@@ -34,34 +57,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: clBackground,
       appBar: AppBar(
-        title: Text(
-          'JARDO',
-          style: titleStyle.copyWith(
-            fontSize: 26,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -1.0,
-            color: Colors.black,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search, color: Colors.black),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.favorite_border, color: Colors.black),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.shopping_bag_outlined, color: Colors.black),
-            onPressed: () {},
-          ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Text('JARDO', style: titleStyle.copyWith(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.black)),
+        actions: const [
+          Icon(Icons.search, color: Colors.black),
+          Icon(Icons.favorite_border, color: Colors.black),
+          Icon(Icons.notifications_none, color: Colors.black),
+          Icon(Icons.shopping_bag_outlined, color: Colors.black),
         ],
-        centerTitle: false,
       ),
       body: Stack(
         children: [
@@ -94,15 +98,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               path,
                               fit: BoxFit.cover,
                               width: double.infinity,
-                              height: 380,
                             ),
                           );
                         }).toList(),
                         options: CarouselOptions(
-                          height: 380,
+                          height: 280,
                           enlargeCenterPage: true,
                           autoPlay: true,
-                          autoPlayInterval: Duration(seconds: 2),
+                          autoPlayInterval: Duration(seconds: 4),
                           viewportFraction: 0.9,
                           onPageChanged: (index, reason) {
                             setState(() {
@@ -112,8 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Padding(padding:  const EdgeInsets.only(left: 16.0, bottom: 10.0),
-                      child:Row(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: sliderImages.asMap().entries.map((entry) {
                           return Container(
@@ -129,11 +131,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         }).toList(),
                       ),
-                      )
                     ],
                   ),
                 ),
-                SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
@@ -155,7 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     physics: BouncingScrollPhysics(),
-                    itemCount: 4,
+                    itemCount: 5,
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     itemBuilder: (context, index) {
                       return Padding(
@@ -173,7 +173,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
@@ -220,10 +219,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         return GestureDetector(
                           onTap: () {
                             Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => ProductDetailScreen(product: product)),
-    );
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ProductDetailPage(
+                                  productName: product.name,
+                                  productPrice: NumberFormat.currency(
+                                    locale: 'vi',
+                                    symbol: '₫',
+                                  ).format(product.price),
+                                  imageUrl: '$urlProduct${product.mainImage}',
+                                ),
+                              ),
+                            );
                           },
                           child: AnimatedContainer(
                             duration: Duration(milliseconds: 200),

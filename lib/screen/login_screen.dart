@@ -1,141 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mobi/config/default.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'register_screen.dart';  // import trang đăng ký
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+const String urlImg          = 'images/';  // dùng cho Google logo
+const Color kPrimaryBlack    = Colors.black;
+const Color kAccentRed       = Colors.red;
+const Color kTextGray        = Colors.grey;
 
-  Widget _buildLogo() {
-    return Column(
-      children: [
-        // Replace with your actual logo asset or widget
-        Icon(Icons.account_circle, size: 100, color: Colors.black87),
-        const SizedBox(height: 16),
-        Text(
-          'JARDO',
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'EST. 2025',
-          style: TextStyle(
-            fontSize: 16,
-            letterSpacing: 2,
-            color: Colors.black54,
-          ),
-        ),
-      ],
-    );
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _phoneCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _phoneCtrl.dispose();
+    super.dispose();
   }
 
-  Widget _buildPhoneInput() {
-    return TextField(
-      keyboardType: TextInputType.phone,
-      decoration: InputDecoration(
-        hintText: 'Số điện thoại của bạn',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-        ),
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      ),
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-    );
+  bool _isPhoneRegistered(String phone) {
+    // TODO: gọi API kiểm tra. 
+    // Hiện tại giả định số nào bắt đầu bằng '09' là đã có, còn lại chưa.
+    return phone.startsWith('09');
   }
 
-  Widget _buildContinueButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.black,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6),
-          ),
-        ),
-        onPressed: () {},
-        child: Text(
-          'TIẾP TỤC',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
-        ),
-      ),
-    );
-  }
+  void _onContinue() {
+    final phone = _phoneCtrl.text.trim();
+    if (phone.isEmpty || phone.length < 9) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập số điện thoại hợp lệ')),
+      );
+      return;
+    }
 
-  Widget _buildDivider() {
-    return Row(
-      children: [
-        Expanded(child: Divider(thickness: 1)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text('HOẶC', style: TextStyle(color: Colors.black54)),
-        ),
-        Expanded(child: Divider(thickness: 1)),
-      ],
-    );
-  }
-
-  Widget _buildSocialButton(
-      {required Color color,
-      required Widget icon,
-      required String text,
-      required Color textColor,
-      VoidCallback? onPressed}) {
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(6),
-          ),
-          elevation: 0,
-        ),
-        icon: icon,
-        label: Text(
-          text,
-          style: TextStyle(
-            color: textColor,
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-          ),
-        ),
-        onPressed: onPressed,
-      ),
-    );
-  }
-
-  Widget _buildTermsText(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Text.rich(
-        TextSpan(
-          text: 'Bằng việc đăng nhập, bạn đã đồng ý với ',
-          style: TextStyle(fontSize: 12, color: Colors.black54),
-          children: [
-            TextSpan(
-              text: 'Điều khoản dịch vụ',
-              style: TextStyle(
-                  color: Colors.blue, decoration: TextDecoration.underline),
-            ),
-            TextSpan(text: ' & '),
-            TextSpan(
-              text: 'chính sách bảo mật',
-              style: TextStyle(
-                  color: Colors.blue, decoration: TextDecoration.underline),
-            ),
-            TextSpan(text: ' của chúng tôi'),
-          ],
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
+    if (_isPhoneRegistered(phone)) {
+      // TODO: chuyển sang màn OTP hoặc home
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Số $phone đã đăng ký, chuyển sang OTP...')),
+      );
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => RegisterScreen( )),
+      );
+    }
   }
 
   @override
@@ -148,25 +60,89 @@ class LoginScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildLogo(),
+
+                // Logo
+                const Icon(Icons.account_circle, size: 100, color: Colors.black87),
+                const SizedBox(height: 16),
+                const Text('JARDO',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                      color: Colors.black87,
+                    )),
+                const SizedBox(height: 4),
+                const Text('EST. 2025',
+                    style: TextStyle(
+                      fontSize: 16, letterSpacing: 2, color: Colors.black54,
+                    )),
+
                 const SizedBox(height: 32),
-                _buildPhoneInput(),
+
+                // Input số điện thoại
+                TextField(
+                  controller: _phoneCtrl,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    hintText: 'Số điện thoại của bạn',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  ),
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                ),
+
                 const SizedBox(height: 16),
-                _buildContinueButton(),
+
+                // Continue button
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kPrimaryBlack,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    onPressed: _onContinue,
+                    child: const Text(
+                      'TIẾP TỤC',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16,color: Colors.white),
+                    ),
+                  ),
+                ),
+
                 const SizedBox(height: 16),
-                _buildDivider(),
+
+                // Divider
+                Row(children: [
+                  const Expanded(child: Divider(thickness: 1)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child:
+                        Text('HOẶC', style: TextStyle(color: kTextGray)),
+                  ),
+                  const Expanded(child: Divider(thickness: 1)),
+                ]),
+
                 const SizedBox(height: 16),
+
+                // Social login
                 _buildSocialButton(
                   color: Colors.black,
-                  icon: Icon(Icons.apple, color: Colors.white),
+                  icon: const Icon(Icons.apple, color: Colors.white),
                   text: 'Tiếp tục bằng Apple',
                   textColor: Colors.white,
                   onPressed: () {},
                 ),
                 const SizedBox(height: 12),
                 _buildSocialButton(
-                  color: Color(0xFF1877F3),
-                  icon: Icon(Icons.facebook, color: Colors.white),
+                  color: const Color(0xFF1877F3),
+                  icon: const Icon(Icons.facebook, color: Colors.white),
                   text: 'Tiếp tục bằng Facebook',
                   textColor: Colors.white,
                   onPressed: () {},
@@ -183,12 +159,70 @@ class LoginScreen extends StatelessWidget {
                   textColor: Colors.black87,
                   onPressed: () {},
                 ),
+
                 const SizedBox(height: 24),
-                _buildTermsText(context),
+
+                // Terms
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text.rich(
+                    TextSpan(
+                      text: 'Bằng việc đăng nhập, bạn đã đồng ý với ',
+                      style: const TextStyle(fontSize: 12, color: Colors.black54),
+                      children: const [
+                        TextSpan(
+                          text: 'Điều khoản dịch vụ',
+                          style: TextStyle(
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline),
+                        ),
+                        TextSpan(text: ' & '),
+                        TextSpan(
+                          text: 'chính sách bảo mật',
+                          style: TextStyle(
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline),
+                        ),
+                        TextSpan(text: ' của chúng tôi'),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSocialButton({
+    required Color color,
+    required Widget icon,
+    required String text,
+    required Color textColor,
+    VoidCallback? onPressed,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
+          elevation: 0,
+        ),
+        icon: icon,
+        label: Text(
+          text,
+          style: TextStyle(
+            color: textColor, fontWeight: FontWeight.w600, fontSize: 16,
+          ),
+        ),
+        onPressed: onPressed,
       ),
     );
   }
