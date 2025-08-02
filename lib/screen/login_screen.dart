@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'register_screen.dart';  // import trang đăng ký
+import 'password_screen.dart';  // import trang đăng nhập bằng mật khẩu
+import '../getdata/user_data.dart'; // import UserData
 
 const String urlImg          = 'images/';  // dùng cho Google logo
 const Color kPrimaryBlack    = Colors.black;
@@ -9,13 +10,14 @@ const Color kAccentRed       = Colors.red;
 const Color kTextGray        = Colors.grey;
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
   final _phoneCtrl = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -23,30 +25,46 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  bool _isPhoneRegistered(String phone) {
-    // TODO: gọi API kiểm tra. 
-    // Hiện tại giả định số nào bắt đầu bằng '09' là đã có, còn lại chưa.
-    return phone.startsWith('09');
-  }
-
-  void _onContinue() {
+  Future<void> _onContinue() async {
     final phone = _phoneCtrl.text.trim();
-    if (phone.isEmpty || phone.length < 9) {
+    if (phone.isEmpty || phone.length < 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Vui lòng nhập số điện thoại hợp lệ')),
       );
       return;
     }
 
-    if (_isPhoneRegistered(phone)) {
-      // TODO: chuyển sang màn OTP hoặc home
+    setState(() => _isLoading = true);
+
+    try {
+      final users = await UserData.getUsers();
+      final isRegistered = users.any((user) => user.phoneNumber == phone);
+
+      if (!mounted) return;
+
+      if (isRegistered) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PasswordScreen(phoneNumber: phone),
+          ),
+        );
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RegisterScreen(phoneNumber: phone),
+          ),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Số $phone đã đăng ký, chuyển sang OTP...')),
+        const SnackBar(content: Text('Đã có lỗi xảy ra')),
       );
-    } else {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => RegisterScreen( )),
-      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -62,22 +80,13 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
 
                 // Logo
-                const Icon(Icons.account_circle, size: 100, color: Colors.black87),
-                const SizedBox(height: 16),
-                const Text('JARDO',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
-                      color: Colors.black87,
-                    )),
-                const SizedBox(height: 4),
-                const Text('EST. 2025',
-                    style: TextStyle(
-                      fontSize: 16, letterSpacing: 2, color: Colors.black54,
-                    )),
-
-                const SizedBox(height: 32),
+                Image.asset(
+                  '${urlImg}logo.png',
+                  height: 400,
+                  width: 400,
+                ),
+               
+                const SizedBox(height: 27),
 
                 // Input số điện thoại
                 TextField(
@@ -108,11 +117,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     onPressed: _onContinue,
-                    child: const Text(
-                      'TIẾP TỤC',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16,color: Colors.white),
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          )
+                        : const Text(
+                            'TIẾP TỤC',
+                            style:
+                                TextStyle(fontWeight: FontWeight.bold, fontSize: 16,color: Colors.white),
+                          ),
                   ),
                 ),
 
@@ -223,6 +236,24 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         onPressed: onPressed,
+      ),
+    );
+  }
+}
+
+class RegisterScreen extends StatelessWidget {
+  final String phoneNumber;
+
+  const RegisterScreen({Key? key, required this.phoneNumber}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Đăng ký'),
+      ),
+      body: Center(
+        child: Text('Register screen for $phoneNumber'),
       ),
     );
   }

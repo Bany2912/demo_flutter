@@ -1,51 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Đảm bảo đã import
+import 'package:intl/intl.dart';
 import 'package:mobi/config/default.dart';
-import 'package:mobi/models/product.dart'; // Đảm bảo đã import
-import 'package:mobi/getdata/product_data.dart'; // Đảm bảo đã import
+import 'package:mobi/models/product.dart';
+import 'package:provider/provider.dart';
+import 'package:mobi/providers/cart_provider.dart';
+import 'package:mobi/getdata/product_data.dart';
 
 class CartScreen extends StatefulWidget {
-  const CartScreen({Key? key}) : super(key: key);
+  const CartScreen({super.key});
 
   @override
   State<CartScreen> createState() => _CartScreenState();
 }
 
 class _CartScreenState extends State<CartScreen> {
-  // Biến giả định cho giỏ hàng, trong thực tế bạn sẽ lấy từ trạng thái ứng dụng hoặc database
-  final List<ShoeProduct> _cartItems = [
-    ShoeProduct(
-      id: "1",
-      name: "Giày Luka 4 PF 'Navigator'",
-      mainImage: "giay1.png",
-      brandId: "nike",
-      categoryId: 1,
-      price: 499000.0, // Đảm bảo là double
-      description: "Description for Luka 4 PF 'Navigator'",
-      variants: [], // Có thể bỏ trống nếu không cần chi tiết variant trong giỏ hàng
-    ),
-    ShoeProduct(
-      id: "2",
-      name: "Air Jordan 1 Mid SE",
-      mainImage: "giay2.png",
-      brandId: "jordan",
-      categoryId: 1,
-      price: 499000.0, // Đảm bảo là double
-      description: "Description for Air Jordan 1 Mid SE",
-      variants: [],
-    ),
-  ];
-
-  // Khởi tạo _productsFuture để tải dữ liệu sản phẩm
   late Future<List<ShoeProduct>> _productsFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    // Gọi phương thức static
-    _productsFuture = ProductData.getProducts();
-    // _categories = CategoryData.getCategories(); // Nếu có CategoryData
-  }
 
   final NumberFormat _currencyFormatter = NumberFormat.currency(
     locale: 'vi_VN',
@@ -54,176 +23,266 @@ class _CartScreenState extends State<CartScreen> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    _productsFuture = ProductData.getProducts();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Tổng tiền của các sản phẩm trong giỏ hàng
-    // Sửa lỗi bằng cách khởi tạo sum là 0.0
-    final totalAmount = _cartItems.fold(0.0, (sum, item) => sum + item.price);
+    return Consumer<CartProvider>(
+      builder: (context, cartProvider, child) {
+        return Scaffold(
+          backgroundColor: clBackground,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0.5,
+            centerTitle: true,
+            title: Text('GIỎ HÀNG', 
+              style: titleStyle.copyWith(fontSize: 18, color: Colors.black)
+            ),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (cartProvider.items.isEmpty)
+                  _buildEmptyCart()
+                else
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: cartProvider.items.length,
+                    itemBuilder: (context, index) {
+                      final item = cartProvider.items[index];
+                      return _buildCartItem(item, index);
+                    },
+                  ),
+                
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 16),
 
-    return Scaffold(
-      backgroundColor: clBackground, // Sử dụng màu nền từ default.dart
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-        centerTitle: true,
-        title: Text('GIỎ HÀNG', style: titleStyle.copyWith(fontSize: 18, color: Colors.black)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Danh sách sản phẩm trong giỏ hàng
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _cartItems.length,
-              itemBuilder: (context, index) {
-                final product = _cartItems[index];
-                return _buildCartItem(product);
-              },
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text('Sản phẩm yêu thích', 
+                    style: titleStyle.copyWith(fontSize: 18)
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildFavoriteProducts(),
+                const SizedBox(height: 24),
+              ],
             ),
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 16),
-
-            // Phần "Sản phẩm yêu thích" (giả định)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text('Sản phẩm yêu thích', style: titleStyle.copyWith(fontSize: 18)),
-            ),
-            const SizedBox(height: 12),
-            FutureBuilder<List<ShoeProduct>>(
-              future: _productsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Không thể tải dữ liệu sản phẩm: ${snapshot.error}'));
-                } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                  // Chỉ lấy 2 sản phẩm đầu tiên làm ví dụ cho "sản phẩm yêu thích"
-                  final favoriteProducts = snapshot.data!.take(2).toList();
-                  return SizedBox(
-                    height: 250, // Chiều cao cố định cho ListView ngang
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: favoriteProducts.length,
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      itemBuilder: (context, index) {
-                        final product = favoriteProducts[index];
-                        return _buildFavoriteProductCard(product);
-                      },
-                    ),
-                  );
-                } else {
-                  return const Center(child: Text('Không có sản phẩm yêu thích nào.'));
-                }
-              },
-            ),
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
-      bottomNavigationBar: _buildBottomBar(totalAmount),
+          ),
+          bottomNavigationBar: cartProvider.items.isEmpty 
+              ? null 
+              : _buildBottomBar(cartProvider.totalAmount),
+        );
+      },
     );
   }
 
-  Widget _buildCartItem(ShoeProduct product) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
+  Widget _buildEmptyCart() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 50),
+          Icon(
+            Icons.shopping_cart_outlined,
+            size: 100,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Giỏ hàng trống',
+            style: titleStyle.copyWith(
+              fontSize: 20,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Hãy thêm sản phẩm vào giỏ hàng của bạn',
+            style: subTitleStyle.copyWith(
+              color: Colors.grey[500],
+            ),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () => Navigator.pushReplacementNamed(context, '/shop'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 32,
+                vertical: 12,
+              ),
+            ),
+            child: const Text('Tiếp tục mua sắm'),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCartItem(CartItem item, int index) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Checkbox
-          Checkbox(value: true, onChanged: (bool? value) {}),
-          // Ảnh sản phẩm
+          Checkbox(
+            value: true,
+            onChanged: (bool? value) {},
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
-              '${urlProduct}${product.mainImage}', // Sử dụng urlProduct từ default.dart
+              '$urlProduct${item.variant.imageUrl}',
               width: 80,
               height: 80,
               fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                width: 80,
+                height: 80,
+                color: Colors.grey[200],
+                child: const Icon(Icons.error_outline),
+              ),
             ),
           ),
           const SizedBox(width: 12),
-          // Thông tin sản phẩm và số lượng
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  product.name,
-                  style: subTitleStyle.copyWith(fontWeight: FontWeight.bold),
+                  item.product.name,
+                  style: subTitleStyle.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _currencyFormatter.format(product.price),
-                  style: productPriceStyle.copyWith(fontSize: 16),
+                  'Size: ${item.size} | ${item.variant.id}',
+                  style: subTitleStyle.copyWith(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _currencyFormatter.format(item.product.price),
+                  style: productPriceStyle.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[300]!),
-                        borderRadius: BorderRadius.circular(5),
+                    _buildQuantityButton(
+                      Icons.remove,
+                      () => context.read<CartProvider>().updateQuantity(
+                        index, 
+                        item.quantity - 1
                       ),
-                      child: const Icon(Icons.remove, size: 20),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text('1', style: subTitleStyle.copyWith(fontSize: 16)),
                     ),
                     Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[300]!),
-                        borderRadius: BorderRadius.circular(5),
+                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('${item.quantity}'),
+                    ),
+                    _buildQuantityButton(
+                      Icons.add,
+                      () => context.read<CartProvider>().updateQuantity(
+                        index, 
+                        item.quantity + 1
                       ),
-                      child: const Icon(Icons.add, size: 20),
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.grey),
+            onPressed: () => context.read<CartProvider>().removeFromCart(index),
+          ),
         ],
       ),
     );
   }
 
+  Widget _buildQuantityButton(IconData icon, VoidCallback onPressed) {
+    return InkWell(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Icon(icon, size: 16),
+      ),
+    );
+  }
+
+  Widget _buildFavoriteProducts() {
+    return FutureBuilder<List<ShoeProduct>>(
+      future: _productsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Không thể tải dữ liệu sản phẩm: ${snapshot.error}')
+          );
+        }
+        
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('Không có sản phẩm yêu thích.'));
+        }
+
+        final favoriteProducts = snapshot.data!.take(2).toList();
+        return SizedBox(
+          height: 250,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: favoriteProducts.length,
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            itemBuilder: (context, index) => _buildFavoriteProductCard(
+              favoriteProducts[index]
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildFavoriteProductCard(ShoeProduct product) {
     return Container(
-      width: 150,
+      width: 160,
       margin: const EdgeInsets.only(right: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 5,
-            offset: const Offset(0, 3),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -233,24 +292,35 @@ class _CartScreenState extends State<CartScreen> {
           Stack(
             children: [
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(8)
+                ),
                 child: Image.asset(
-                  '${urlProduct}${product.mainImage}',
-                  height: 120,
+                  '$urlProduct${product.mainImage}',
+                  height: 140,
                   width: double.infinity,
                   fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    height: 140,
+                    color: Colors.grey[200],
+                    child: const Icon(Icons.error_outline),
+                  ),
                 ),
               ),
               Positioned(
                 top: 8,
                 right: 8,
                 child: Container(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(6),
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.favorite_border, size: 20, color: Colors.red),
+                  child: const Icon(
+                    Icons.favorite_border,
+                    size: 18,
+                    color: Colors.red,
+                  ),
                 ),
               ),
             ],
@@ -262,14 +332,17 @@ class _CartScreenState extends State<CartScreen> {
               children: [
                 Text(
                   product.name,
-                  style: subTitleStyle.copyWith(fontSize: 14),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                  style: subTitleStyle.copyWith(fontSize: 13),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   _currencyFormatter.format(product.price),
-                  style: productPriceStyle.copyWith(fontSize: 16),
+                  style: productPriceStyle.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -281,15 +354,14 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget _buildBottomBar(double totalAmount) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 8,
-            offset: const Offset(0, -3),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
           ),
         ],
       ),
@@ -298,39 +370,53 @@ class _CartScreenState extends State<CartScreen> {
         children: [
           Row(
             children: [
-              Checkbox(value: true, onChanged: (bool? value) {}),
-              const Text('Tất cả', style: TextStyle(fontSize: 16)),
+              const Text('Tổng tiền:', style: TextStyle(fontSize: 14)),
               const Spacer(),
               Text(
-                'Tổng tiền:',
-                style: subTitleStyle.copyWith(fontSize: 18),
-              ),
-              const SizedBox(width: 8),
-              Text(
                 _currencyFormatter.format(totalAmount),
-                style: productPriceStyle.copyWith(fontSize: 18, fontWeight: FontWeight.bold),
+                style: productPriceStyle.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                // Xử lý khi nhấn "Tiếp tục"
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => context.read<CartProvider>().clearCart(),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: const BorderSide(color: Colors.black),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Xóa tất cả',
+                    style: TextStyle(color: Colors.black),
+                  ),
                 ),
               ),
-              child: const Text(
-                'Tiếp tục',
-                style: TextStyle(fontSize: 18, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    // TODO: Implement checkout logic
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text('Thanh toán'),
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),

@@ -1,0 +1,22 @@
+{
+  "data": [
+    {
+      "id": "user1",
+      "firstName": "Pham",
+      "lastName": "Duc An",
+      "email": "phamducan2610@gmail.com",
+      "password": "password123",
+      "birthDate": "2004-10-26T00:00:00.000Z",
+      "phoneNumber": "0867920384"
+    },
+    {
+      "id": "user2",
+      "firstName": "Nguyen",
+      "lastName": "Van A",
+      "email": "nguyenvana@gmail.com",
+      "password": "password456",
+      "birthDate": "2000-01-01T00:00:00.000Z",
+      "phoneNumber": "0123456789"
+    }
+  ]
+}

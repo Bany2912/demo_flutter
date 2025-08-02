@@ -20,7 +20,7 @@ final InputDecoration kInputDecoration = InputDecoration(
 );
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  const RegisterScreen({super.key});
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
@@ -62,7 +62,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      // TODO: gọi API đăng ký
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đăng ký thành công!')),
       );

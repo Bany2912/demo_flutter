@@ -8,7 +8,7 @@ import 'package:mobi/screen/productdetail_screen.dart'; // Màn hình chi tiết
 import 'package:mobi/screen/cart_screen.dart'; // Import CartScreen
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -317,7 +317,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ClipRRect(
                                         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                                         child: Image.asset(
-                                          '${urlProduct}${product.mainImage}', // Sử dụng mainImage từ dữ liệu
+                                          '$urlProduct${product.mainImage}', // Sử dụng mainImage từ dữ liệu
                                           fit: BoxFit.cover,
                                           errorBuilder: (context, error, stackTrace) {
                                             return Container(

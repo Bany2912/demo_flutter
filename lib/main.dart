@@ -3,10 +3,22 @@ import 'package:mobi/config/default.dart';
 import 'package:mobi/screen/home_screen.dart'; // Đảm bảo đúng đường dẫn file home_screen.dart
 import 'package:mobi/screen/shopping_screen.dart'; // Đảm bảo đúng đường dẫn
 import 'package:mobi/screen/other_screen.dart'; // Đảm bảo đúng đường dẫn
-
+import 'package:provider/provider.dart'; // Thêm import cho provider
+import 'package:mobi/providers/cart_provider.dart'; // Đường dẫn tới file cart_provider.dart của bạn
+import 'package:mobi/providers/auth_provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        // Add other providers here if needed
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
